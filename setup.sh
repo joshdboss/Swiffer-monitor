@@ -12,8 +12,12 @@ clear
 echo '###################'
 echo 'SETTING UP WIFI'
 echo '###################'
-git clone https://github.com/joshdboss/RaspiWifi /home/pi/raspiwifi-setup/
-python3 /home/pi/raspiwifi-setup/initial_setup.py
+echo -n "Do you want to setup wifi. Only select 'no' if it has already been done? (y/n) > "
+	read response
+	if [ "$response" == "y" ]; then
+		git clone https://github.com/joshdboss/RaspiWifi /home/pi/raspiwifi-setup/
+		python3 /home/pi/raspiwifi-setup/initial_setup.py
+	fi
 
 # setup the interfaces
 clear
