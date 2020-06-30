@@ -1,17 +1,33 @@
 #!/usr/bin/env python
 from datetime import datetime
 import time
+import http.client as httplib
 
 import RPi.GPIO as gpio
 import subprocess
 
 import camera_lib
 import IMU_lib
-
+import sync_lib
 
 import concurrent.futures
 import threading
 from functools import partial
+
+import sys
+sys.path.append('/usr/lib/raspiwifi/reset_device')
+import reset_lib as reset_lib
+
+def internet():
+    conn = httplib.HTTPConnection("www.google.com", timeout=5)
+    try:
+        conn.request("HEAD", "/")
+        conn.close()
+        return True
+    except:
+        conn.close()
+        return False
+    
 
 def powerButtonEvent(channel):
     """ Power off the raspberry Pi if the button was pressed down for long enough
@@ -64,36 +80,54 @@ def stopRecord(process):
     global recordMode
     recordMode = False
     print("Stopped recording")
-    gpio.output(recordLEDPin,gpio.LOW)
     camera_lib.stopCameraRecord()
     IMU_lib.stopIMURecord
     if process:
-        executor.submit(camera_lib.processVideo)
         executor.submit(IMU_lib.processIMU)
-#     x = threading.Thread(target=camera_lib.processVideo, kwargs={'delay':processDelay,})
-#     x.start()
+        processVidTask =  executor.submit(camera_lib.processVideo)
+        processVidTask.add_done_callback(doneProcess)
+            
+def doneProcess(result):
+    global recordLEDPin
+    gpio.output(recordLEDPin,gpio.LOW)
+    print("Stopped processing")
     
 def syncButtonEvent(channel):
-    """ Puts the Pi in sync mode (change to match with RaspiWifi eventually)
+    """ Manually syncs the Pi/Resets the wifi
     """
-    global syncMode
-    if syncMode:
-        stopSync()
+    global syncRiseTime
+    
+    if gpio.input(channel):
+        print("rising")
+        if ((datetime.now()-syncRiseTime).seconds >= 10):
+            # reset the device only if button was pressed for 3 seconds
+            print("success")
+            #reset_lib.reset_to_host_mode()
+        else:
+            print("Syncing")
+            executor.submit(sync)
     else:
-        startSync()
+        print("falling")
+        syncRiseTime = datetime.now() #time when button was pressed
 
-def startSync():
-    global syncMode
-    syncMode = True
-    gpio.output(syncLEDPin,gpio.HIGH)
-    print("Started syncing")
+def sync():
+    global syncLEDPin, syncMode
     
-def stopSync():
-    global syncMode
-    syncMode = False
-    gpio.output(syncLEDPin,gpio.LOW)
-    print("Stopped syncing")
-    
+    if not syncMode:
+        if internet():
+            print("Started syncing")
+            gpio.output(syncLEDPin,gpio.HIGH)
+            sync_lib.syncGDrive()
+            gpio.output(syncLEDPin,gpio.LOW)
+            print("Stopped syncing")
+        else:
+            print("Could not sync, no internet")
+            for i in range(3):
+                gpio.output(channel,gpio.HIGH)
+                time.sleep(0.2)
+                gpio.output(channel,gpio.LOW)
+                time.sleep(0.2)
+
 def cleanup():
     """ Function that is called whenever exiting the script
         to clean things up properly
@@ -101,9 +135,8 @@ def cleanup():
     with executor:
         if recordMode:
             stopRecord(False)
-        if syncMode:   
-            stopSync()
     gpio.cleanup()
+    
 
 if __name__ == "__main__":
     """ Main script of the swiffer monitor.
@@ -127,15 +160,22 @@ if __name__ == "__main__":
     gpio.setup(recordButtonPin, gpio.IN, pull_up_down=gpio.PUD_UP) #record button
     print('Setup complete')
     
+    # Set all LEDs low just in case
+    gpio.output(powerLEDPin,gpio.HIGH)
+    gpio.output(syncLEDPin,gpio.LOW)
+    gpio.output(recordLEDPin,gpio.LOW)
+    
     # Variables to put the Pi in the right mode
     powerRiseTime = datetime.now()
+    syncRiseTime = datetime.now()
     recordMode = False
     syncMode = False
     
     executor = concurrent.futures.ThreadPoolExecutor(max_workers=3)
-
+    executor.submit(sync)
+    
     gpio.add_event_detect(powerButtonPin, gpio.BOTH, callback=powerButtonEvent, bouncetime=300)
-    gpio.add_event_detect(syncButtonPin, gpio.FALLING, callback=syncButtonEvent, bouncetime=300)
+    gpio.add_event_detect(syncButtonPin, gpio.BOTH, callback=syncButtonEvent, bouncetime=300)
     gpio.add_event_detect(recordButtonPin, gpio.FALLING, callback=recordButtonEvent, bouncetime=5000)
     
     
