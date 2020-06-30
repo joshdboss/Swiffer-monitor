@@ -64,13 +64,13 @@ def processVideo(inputRootFolder='/home/pi/Logging/UnprocessedVideo',
     """
     print('Processing videos')
     sleep(delay) # hardcoded sleep function to ensure that the video has finished saving
-	# Create directories if necessary
-	try:
+    # Create directories if necessary
+    try:
         os.makedirs(inputRootFolder)
     except OSError as e:
         if e.errno != errno.EEXIST:
             raise # This was not a "directory exists" error
-	try:
+    try:
         os.makedirs(outputFolder)
     except OSError as e:
         if e.errno != errno.EEXIST:
