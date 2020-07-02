@@ -49,7 +49,7 @@ def powerOff():
     cleanup()
     time.sleep(5)
     print('shutting down')
-    #subprocess.call(['shutdown', '-h', 'now'], shell=False)    
+    subprocess.call(['shutdown', '-h', 'now'], shell=False)    
         
 def recordButtonEvent(channel):
     """ Stops/starts recording accordingly
@@ -81,7 +81,7 @@ def stopRecord(process):
     recordMode = False
     print("Stopped recording")
     camera_lib.stopCameraRecord()
-    IMU_lib.stopIMURecord
+    IMU_lib.stopIMURecord()
     if process:
         executor.submit(IMU_lib.processIMU)
         processVidTask =  executor.submit(camera_lib.processVideo)
@@ -100,9 +100,16 @@ def syncButtonEvent(channel):
     if gpio.input(channel):
         print("rising")
         if ((datetime.now()-syncRiseTime).seconds >= 10):
-            # reset the device only if button was pressed for 3 seconds
+            # reset the device only if button was pressed for 10 seconds
             print("success")
-            #reset_lib.reset_to_host_mode()
+            for i in range(3):
+                gpio.output(syncLEDPin,gpio.HIGH)
+                time.sleep(0.2)
+                gpio.output(syncLEDPin,gpio.LOW)
+                time.sleep(0.2)
+            cleanup()
+            time.sleep(5)
+            reset_lib.reset_to_host_mode()
         else:
             print("Syncing")
             executor.submit(sync)
@@ -171,7 +178,7 @@ if __name__ == "__main__":
     recordMode = False
     syncMode = False
     
-    executor = concurrent.futures.ThreadPoolExecutor(max_workers=3)
+    executor = concurrent.futures.ThreadPoolExecutor(max_workers=5)
     executor.submit(sync)
     
     gpio.add_event_detect(powerButtonPin, gpio.BOTH, callback=powerButtonEvent, bouncetime=300)

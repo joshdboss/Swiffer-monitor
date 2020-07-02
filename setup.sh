@@ -1,4 +1,8 @@
 #!/bin/bash
+if [ "$EUID" -ne 0 ]
+  then echo "Please run as root"
+  exit
+fi
 
 clear
 echo '###################'
@@ -12,12 +16,12 @@ clear
 echo '###################'
 echo 'SETTING UP WIFI'
 echo '###################'
-echo -n "Do you want to setup wifi. Only select 'no' if it has already been done? (y/n) > "
-	read response
-	if [ "$response" == "y" ]; then
-		git clone https://github.com/joshdboss/RaspiWifi /home/pi/raspiwifi-setup/
-		python3 /home/pi/raspiwifi-setup/initial_setup.py
-	fi
+echo -n "Do you want to setup wifi? Only select 'no' if it has already been done. (y/n) > "
+read response
+if [ "$response" == "y" ]; then
+	git clone https://github.com/joshdboss/RaspiWifi /home/pi/raspiwifi-setup/
+	python3 /home/pi/raspiwifi-setup/initial_setup.py
+fi
 
 # setup the interfaces
 clear
@@ -46,25 +50,39 @@ clear
 echo '###################'
 echo 'SETTING UP IMU'
 echo '###################'
-apt-get -y install libi2c-dev libeigen3-dev libboost-program-options-dev moreutils
-git clone https://github.com/DavidEGrayson/minimu9-ahrs /home/pi/minimu9-ahrs-setup/
-make -C /home/pi/minimu9-ahrs-setup/
-make install -C /home/pi/minimu9-ahrs-setup/
-cp ./static_files/.minimu9-ahrs /home/pi/
+echo -n "Do you want to setup the IMU? Only select 'no' if it has already been done. (y/n) > "
+read response
+if [ "$response" == "y" ]; then
+	apt-get -y install libi2c-dev libeigen3-dev libboost-program-options-dev moreutils
+	git clone https://github.com/DavidEGrayson/minimu9-ahrs /home/pi/minimu9-ahrs-setup/
+	make -C /home/pi/minimu9-ahrs-setup/
+	make install -C /home/pi/minimu9-ahrs-setup/
+	cp ./static_files/.minimu9-ahrs /home/pi/
+fi
+
 
 # setup the SCRIPTS
 clear
 echo '###################'
 echo 'SETTING UP SCRIPTS'
 echo '###################'
-cp ./scripts/ /usr/lib/swiffer-monitor/
+cp -r ./scripts/ /usr/lib/swiffer-monitor/
 cp ./static_files/swiffer-monitor-bootstrapper /etc/cron.d/
-mkdir /home/pi/Logging/
-mkdir /home/pi/Logging/Unsent
-mkdir /home/pi/Logging/Sent
-mkdir /home/pi/Logging/UnprocessedIMU
-mkdir /home/pi/Logging/UnprocessedVideo
+chmod +x /etc/cron.d/swiffer-monitor-bootstrapper
+mkdir -m777 /home/pi/Logging/
+mkdir -m777 /home/pi/Logging/Unsent
+mkdir -m777 /home/pi/Logging/Sent
+mkdir -m777 /home/pi/Logging/UnprocessedIMU
+mkdir -m777 /home/pi/Logging/UnprocessedVideo
 
+
+# setup rclone
+clear
+echo '###################'
+echo 'SETTING UP RCLONE'
+echo '###################'
+curl -L https://raw.github.com/pageauc/rclone4pi/master/rclone-install.sh | bash
+rclone config
 
 # reboot
 clear

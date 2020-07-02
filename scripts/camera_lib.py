@@ -2,6 +2,7 @@
 from picamera import PiCamera
 import io
 import os
+import errno
 import itertools
 from datetime import datetime
 from time import sleep

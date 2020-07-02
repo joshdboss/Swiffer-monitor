@@ -4,21 +4,10 @@ from time import sleep
 
 import io
 import os
+import errno
 import subprocess
 import itertools
 import shutil
-
-# import signal
-# import ctypes
-# 
-# libc = ctypes.CDLL("libc.so.6")
-# def set_pdeathsig(sig = signal.SIGTERM):
-#     """ Function to make sure the processes are terminated on script ending
-#     """
-#     def callable():
-#         return libc.prctl(1, sig)
-#     return callable
-
 
 def outputs(folderName):
     """ Gives the filename to output in
@@ -114,14 +103,14 @@ def processIMU(inputRootFolder='/home/pi/Logging/UnprocessedIMU',
                         IMULog.write(line)
                     else:
                         break #reached part of file that overlaps previous
-                lastTimeRaw = line.split(' ')[0].split('_')
-                seconds, milli = lastTimeRaw[-1].split('.')
-                lastTimeRaw[-1] = seconds
-                lastTimeRaw.append(milli)
-                lastTime = list(map(int, lastTimeRaw))
-                lastFileEndTime = datetime(
-                    lastTime[0], lastTime[1], lastTime[2], lastTime[3], lastTime[4],
-                    lastTime[5], lastTime[6])
+					lastTimeRaw = line.split(' ')[0].split('_')
+					seconds, milli = lastTimeRaw[-1].split('.')
+					lastTimeRaw[-1] = seconds
+					lastTimeRaw.append(milli)
+					lastTime = list(map(int, lastTimeRaw))
+					lastFileEndTime = datetime(
+						lastTime[0], lastTime[1], lastTime[2], lastTime[3], lastTime[4],
+						lastTime[5], lastTime[6])
                 inFile.close()
         IMULog.close()
         shutil.rmtree(folderName, ignore_errors=True) #delete the folder
