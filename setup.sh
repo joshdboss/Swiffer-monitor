@@ -1,27 +1,10 @@
 #!/bin/bash
-if [ "$EUID" -ne 0 ]
-  then echo "Please run as root"
-  exit
-fi
-
 clear
 echo '###################'
 echo 'UPDATING OS'
 echo '###################'
 apt-get update
 apt-get -y upgrade
-
-# setup wifi
-clear
-echo '###################'
-echo 'SETTING UP WIFI'
-echo '###################'
-echo -n "Do you want to setup wifi? Only select 'no' if it has already been done. (y/n) > "
-read response
-if [ "$response" == "y" ]; then
-	git clone https://github.com/joshdboss/RaspiWifi /home/pi/raspiwifi-setup/
-	python3 /home/pi/raspiwifi-setup/initial_setup.py
-fi
 
 # setup the interfaces
 clear
@@ -60,7 +43,6 @@ if [ "$response" == "y" ]; then
 	cp ./static_files/.minimu9-ahrs /home/pi/
 fi
 
-
 # setup the SCRIPTS
 clear
 echo '###################'
@@ -74,15 +56,6 @@ mkdir -m777 /home/pi/Logging/Unsent
 mkdir -m777 /home/pi/Logging/Sent
 mkdir -m777 /home/pi/Logging/UnprocessedIMU
 mkdir -m777 /home/pi/Logging/UnprocessedVideo
-
-
-# setup rclone
-clear
-echo '###################'
-echo 'SETTING UP RCLONE'
-echo '###################'
-curl -L https://raw.github.com/pageauc/rclone4pi/master/rclone-install.sh | bash
-rclone config
 
 # reboot
 clear
