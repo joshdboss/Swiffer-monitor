@@ -109,7 +109,7 @@ def syncButtonEvent(channel):
                 time.sleep(0.2)
             cleanup()
             time.sleep(5)
-            reset_lib.reset_to_host_mode()
+            #reset_lib.reset_to_host_mode()
         else:
             print("Syncing")
             executor.submit(sync)
