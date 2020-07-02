@@ -5,6 +5,7 @@ from time import sleep
 import io
 import os
 import errno
+import logging
 import subprocess
 import itertools
 import shutil
@@ -34,7 +35,7 @@ def startIMURecord(rootFolderName='/home/pi/Logging/UnprocessedIMU', saveFrequen
     """
     global IMURecordLoop
     IMURecordLoop = True 
-    print('Logging IMU data')
+    logging.info('Logging IMU data')
     folderName = yieldFolder(rootFolderName)
     for outputFile in outputs(folderName): #get name of the file and iterate forever
         sensorStream = subprocess.Popen(['timeout', '12', 'minimu9-ahrs', '--output', 'euler'], shell=False,
@@ -63,7 +64,7 @@ def processIMU(inputRootFolder='/home/pi/Logging/UnprocessedIMU',
     """ Processes any unprocessed IMU logs in the inputRootFolder
         and outputs them in the outputFolder
     """
-    print('Processing IMU logs')
+    logging.info('Processing IMU logs')
     sleep(delay) # hardcoded sleep function to ensure that the log has finished saving
     # Create directories if necessary
     try:
@@ -114,7 +115,7 @@ def processIMU(inputRootFolder='/home/pi/Logging/UnprocessedIMU',
                 inFile.close()
         IMULog.close()
         shutil.rmtree(folderName, ignore_errors=True) #delete the folder
-    print('Processed IMU logs')
+    logging.info('Processed IMU logs')
 
 IMURecordLoop = False    
 #startIMURecord()

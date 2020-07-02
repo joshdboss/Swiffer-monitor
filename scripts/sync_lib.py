@@ -2,7 +2,7 @@
 import os
 import shutil
 import subprocess
-
+import logging
 
 def syncGDrive(inputRootFolder='/home/pi/Logging/Unsent',
                outputFolder='gdmedia:/Logging',
@@ -11,7 +11,7 @@ def syncGDrive(inputRootFolder='/home/pi/Logging/Unsent',
     files = os.listdir(inputRootFolder)
     for f in files:
         fileName = os.path.join(inputRootFolder,f)
-        print("Syncing", fileName)
+        logging.info('Syncing', fileName)
         # copy the files to the google Drive
         subprocess.call(['rclone', 'copy', fileName, outputFolder], shell=False)
         # move the files to the sent directory

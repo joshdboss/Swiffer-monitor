@@ -3,7 +3,10 @@ from picamera import PiCamera
 import io
 import os
 import errno
+import logging
+
 import itertools
+
 from datetime import datetime
 from time import sleep
 import subprocess
@@ -41,7 +44,7 @@ def startCameraRecord(rootFolderName='/home/pi/Logging/UnprocessedVideo', resolu
         camera.annotate_text_size = 20
         
         folderName = yieldFolder(rootFolderName)
-        print('Recording video to %s/' % folderName)
+        logging.info('Recording video to %s/' % folderName)
 
         for output in camera.record_sequence(
             outputs(folderName), quality=cam_quality, bitrate=cam_bitrate):
@@ -63,7 +66,7 @@ def processVideo(inputRootFolder='/home/pi/Logging/UnprocessedVideo',
     """ Processes any unprocessed video in the inputRootFolder
         and outputs them in the outputFolder
     """
-    print('Processing videos')
+    logging.info('Processing videos')
     sleep(delay) # hardcoded sleep function to ensure that the video has finished saving
     # Create directories if necessary
     try:
@@ -95,6 +98,6 @@ def processVideo(inputRootFolder='/home/pi/Logging/UnprocessedVideo',
         subprocess.call(['ffmpeg', '-y', '-f', 'concat', '-safe', '0', '-i',
                          videoListName, '-c', 'copy', outputFile], shell=False)
         shutil.rmtree(folderName, ignore_errors=True) #delete the folder
-    print('Processed videos')
+    logging.info('Processed videos')
     
 cameraRecordLoop = False
