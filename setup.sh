@@ -52,6 +52,7 @@ cp -r ./scripts/ /usr/lib/swiffer-monitor/
 cp ./static_files/swiffer-monitor-bootstrapper /etc/cron.d/
 chmod +x /etc/cron.d/swiffer-monitor-bootstrapper
 mkdir -m777 /home/pi/Logging/
+mkdir -m777 /home/pi/Logging/MonitorLog
 mkdir -m777 /home/pi/Logging/Unsent
 mkdir -m777 /home/pi/Logging/Sent
 mkdir -m777 /home/pi/Logging/UnprocessedIMU

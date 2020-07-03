@@ -17,7 +17,7 @@ from functools import partial
 
 import sys
 sys.path.append('/usr/lib/raspiwifi/reset_device')
-import reset_lib as reset_lib
+import reset_lib
 
 def internet():
     conn = httplib.HTTPConnection("www.google.com", timeout=5)
@@ -126,6 +126,7 @@ def sync():
             logging.info('Started syncing')
             gpio.output(syncLEDPin,gpio.HIGH)
             sync_lib.syncGDrive()
+            sync_lib.syncGDrive(move=False, inputRootFolder='/home/pi/Logging/MonitorLog')
             gpio.output(syncLEDPin,gpio.LOW)
             logging.info('Stopped syncing')
         else:
@@ -151,7 +152,7 @@ if __name__ == "__main__":
     """ Main script of the swiffer monitor.
         Runs record/sync functions according to button presses
     """
-    logging.basicConfig(filename='/home/pi/Logging/Unsent/%s' %
+    logging.basicConfig(filename='/home/pi/Logging/MonitorLog/MonitorLog_%s.txt' %
                         (datetime.now().strftime('%Y_%m_%d_%H_%M_%S')),
                         level=logging.DEBUG)
     

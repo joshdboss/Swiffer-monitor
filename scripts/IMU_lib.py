@@ -86,7 +86,7 @@ def processIMU(inputRootFolder='/home/pi/Logging/UnprocessedIMU',
         folderName = os.path.join(inputRootFolder,folder)
         lastFileEndTime = datetime(1900,1,1,0,0,0) #variable tracking the end time of the previous file
         truncated = False #variable tracking if current file has been truncated yet
-        outputFile = '%s/%s.txt' % (outputFolder, folder)
+        outputFile = '%s/IMULog_%s.txt' % (outputFolder, folder)
         IMULog = io.open(outputFile, 'w')
         for fileName in sorted(os.listdir(folderName)): #add each file's content to outputFile
             if (fileName.endswith('.txt')):
