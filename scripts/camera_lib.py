@@ -16,7 +16,7 @@ def outputs(folderName):
     """ Gives the filename to output in
     """
     for i in itertools.count(1):
-        yield io.open('%s/%s.h264' %
+        yield io.open('%s/Video_%s.h264' %
                       (folderName,
                        datetime.now().strftime('%Y_%m_%d_%H_%M_%S')),
                       'wb')
@@ -89,7 +89,7 @@ def processVideo(inputRootFolder='/home/pi/Logging/UnprocessedVideo',
         videoListName = '%s/videoList.txt' % folderName #file that will contain list of videos
         videoList = io.open(videoListName, 'w')
         for fileName in sorted(os.listdir(folderName)): #add each video in the folder to the file
-            if (fileName.endswith('.h264')):
+            if (fileName.startswith('Video')):
                 videoString = ("file '%s/%s'\n" % (folderName, fileName))
                 videoList.write(videoString)
         videoList.close()

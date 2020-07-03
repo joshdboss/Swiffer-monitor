@@ -27,6 +27,8 @@ else
 	echo 'dtoverlay=i2c-rtc,ds1307' >> /boot/config.txt
 fi  
 cp ./static_files/hwclock-set /lib/udev/
+apt-get -y remove fake-hwclock
+update-rc.d -f fake-hwclock remove
 
 # setup the IMU
 clear
@@ -40,7 +42,7 @@ if [ "$response" == "y" ]; then
 	git clone https://github.com/DavidEGrayson/minimu9-ahrs /home/pi/minimu9-ahrs-setup/
 	make -C /home/pi/minimu9-ahrs-setup/
 	make install -C /home/pi/minimu9-ahrs-setup/
-	cp ./static_files/.minimu9-ahrs /home/pi/
+	cp ./static_files/.minimu9-ahrs /root/
 fi
 
 # setup the SCRIPTS
@@ -48,6 +50,7 @@ clear
 echo '###################'
 echo 'SETTING UP SCRIPTS'
 echo '###################'
+rm -r /usr/lib/swiffer-monitor/
 cp -r ./scripts/ /usr/lib/swiffer-monitor/
 cp ./static_files/swiffer-monitor-bootstrapper /etc/cron.d/
 chmod +x /etc/cron.d/swiffer-monitor-bootstrapper

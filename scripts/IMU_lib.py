@@ -14,7 +14,7 @@ def outputs(folderName):
     """ Gives the filename to output in
     """
     for i in itertools.count(1):
-        yield io.open('%s/%s.txt' %
+        yield io.open('IMULog_%s/%s.txt' %
                       (folderName,
                        datetime.now().strftime('%Y_%m_%d_%H_%M_%S')),
                       'w')
@@ -35,8 +35,10 @@ def startIMURecord(rootFolderName='/home/pi/Logging/UnprocessedIMU', saveFrequen
     """
     global IMURecordLoop
     IMURecordLoop = True 
-    logging.info('Logging IMU data')
+    
     folderName = yieldFolder(rootFolderName)
+    logging.info('Logging IMU data to %s/' % folderName)
+    
     for outputFile in outputs(folderName): #get name of the file and iterate forever
         sensorStream = subprocess.Popen(['timeout', '12', 'minimu9-ahrs', '--output', 'euler'], shell=False,
                                         stdout=subprocess.PIPE)
@@ -89,7 +91,7 @@ def processIMU(inputRootFolder='/home/pi/Logging/UnprocessedIMU',
         outputFile = '%s/IMULog_%s.txt' % (outputFolder, folder)
         IMULog = io.open(outputFile, 'w')
         for fileName in sorted(os.listdir(folderName)): #add each file's content to outputFile
-            if (fileName.endswith('.txt')):
+            if (fileName.startswith('IMULog')):
                 inFile = open('%s/%s' %(folderName, fileName), 'r')
                 for line in inFile.readlines():
                     lineTimeRaw = line.split(' ')[0].split('_')
@@ -104,14 +106,14 @@ def processIMU(inputRootFolder='/home/pi/Logging/UnprocessedIMU',
                         IMULog.write(line)
                     else:
                         break #reached part of file that overlaps previous
-                    lastTimeRaw = line.split(' ')[0].split('_')
-                    seconds, milli = lastTimeRaw[-1].split('.')
-                    lastTimeRaw[-1] = seconds
-                    lastTimeRaw.append(milli)
-                    lastTime = list(map(int, lastTimeRaw))
-                    lastFileEndTime = datetime(
-                        lastTime[0], lastTime[1], lastTime[2], lastTime[3], lastTime[4],
-                        lastTime[5], lastTime[6])
+                lastTimeRaw = line.split(' ')[0].split('_')
+                seconds, milli = lastTimeRaw[-1].split('.')
+                lastTimeRaw[-1] = seconds
+                lastTimeRaw.append(milli)
+                lastTime = list(map(int, lastTimeRaw))
+                lastFileEndTime = datetime(
+                    lastTime[0], lastTime[1], lastTime[2], lastTime[3], lastTime[4],
+                    lastTime[5], lastTime[6])
                 inFile.close()
         IMULog.close()
         shutil.rmtree(folderName, ignore_errors=True) #delete the folder
