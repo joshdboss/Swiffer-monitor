@@ -55,9 +55,9 @@ def recordButtonEvent(channel):
     """ Stops/starts recording accordingly
         when button is pressed
     """ 
-    global recordMode
+    global recordMode, processMode
     logging.debug('Record button pressed')
-    if recordMode:
+    if recordMode and not processMode:
         stopRecord(True)
     else:
         startRecord()
@@ -66,7 +66,7 @@ def startRecord():
     """ Start recording sequence
         Starts the camera and the IMU
     """
-    global recordMode, executor
+    global recordMode, executor, recordLEDPin
     recordMode = True
     logging.info('Started recording')
     gpio.output(recordLEDPin,gpio.HIGH)
@@ -77,25 +77,32 @@ def stopRecord(process):
     """ Stops recording sequence
         Stops the camera and the IMU
     """
-    global recordMode, executor
+    global recordMode, processMode executor, recordLEDPin
+    for i in range(3):
+        gpio.output(recordLEDPin,gpio.LOW)
+        time.sleep(0.2)
+        gpio.output(recordLEDPin,gpio.HIGH)
+        time.sleep(0.2)
     recordMode = False
     logging.info('Stopped recording')
     camera_lib.stopCameraRecord()
     IMU_lib.stopIMURecord()
     if process:
+        processMode = True
         executor.submit(IMU_lib.processIMU)
         processVidTask =  executor.submit(camera_lib.processVideo)
         processVidTask.add_done_callback(doneProcess)
             
 def doneProcess(result):
-    global recordLEDPin
+    global recordLEDPin, processMode
+    processMode = False
     gpio.output(recordLEDPin,gpio.LOW)
     logging.info('Stopped processing data')
     
 def syncButtonEvent(channel):
     """ Manually syncs the Pi/Resets the wifi
     """
-    global syncRiseTime, executor
+    global syncRiseTime, executor, syncLEDPin
     
     if gpio.input(channel):
         print("rising")
@@ -118,14 +125,14 @@ def syncButtonEvent(channel):
         syncRiseTime = datetime.now() #time when button was pressed
 
 def sync():
-    global syncLEDPin, syncMode
+    global syncLEDPin, syncMode, loggingFile
     
     if not syncMode:
         if internet():
             logging.info('Started syncing')
             gpio.output(syncLEDPin,gpio.HIGH)
             sync_lib.syncGDrive()
-            sync_lib.syncGDrive(move=False, inputRootFolder='/home/pi/Logging/MonitorLog')
+            sync_lib.syncGDrive(inputRootFolder='/home/pi/Logging/MonitorLog', skipFile=loggingFile)
             gpio.output(syncLEDPin,gpio.LOW)
             logging.info('Stopped syncing')
         else:
@@ -140,7 +147,7 @@ def cleanup():
     """ Function that is called whenever exiting the script
         to clean things up properly
     """
-	global executor
+    global executor
     logging.info('Cleaning up')
     with executor:
         if recordMode:
@@ -152,8 +159,8 @@ if __name__ == "__main__":
     """ Main script of the swiffer monitor.
         Runs record/sync functions according to button presses
     """
-    logging.basicConfig(filename='/home/pi/Logging/MonitorLog/MonitorLog_%s.txt' %
-                        (datetime.now().strftime('%Y_%m_%d_%H_%M_%S')),
+    loggingFile = '/home/pi/Logging/MonitorLog/MonitorLog_%s.txt' % (datetime.now().strftime('%Y_%m_%d_%H_%M_%S'))
+    logging.basicConfig(filename=loggingFile,
                         level=logging.DEBUG)
     
     # Variables to put the Pi in the right mode
@@ -161,6 +168,7 @@ if __name__ == "__main__":
     syncRiseTime = datetime.now()
     recordMode = False
     syncMode = False
+    processMode = False
                         
     # Setup all of the GPIO pins
     logging.debug('Setting up GPIO pins')
