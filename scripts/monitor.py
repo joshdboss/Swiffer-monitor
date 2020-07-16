@@ -66,8 +66,7 @@ def startRecord():
     """ Start recording sequence
         Starts the camera and the IMU
     """
-    global recordMode
-    global executor
+    global recordMode, executor
     recordMode = True
     logging.info('Started recording')
     gpio.output(recordLEDPin,gpio.HIGH)
@@ -78,7 +77,7 @@ def stopRecord(process):
     """ Stops recording sequence
         Stops the camera and the IMU
     """
-    global recordMode
+    global recordMode, executor
     recordMode = False
     logging.info('Stopped recording')
     camera_lib.stopCameraRecord()
@@ -96,7 +95,7 @@ def doneProcess(result):
 def syncButtonEvent(channel):
     """ Manually syncs the Pi/Resets the wifi
     """
-    global syncRiseTime
+    global syncRiseTime, executor
     
     if gpio.input(channel):
         print("rising")
@@ -141,6 +140,7 @@ def cleanup():
     """ Function that is called whenever exiting the script
         to clean things up properly
     """
+	global executor
     logging.info('Cleaning up')
     with executor:
         if recordMode:

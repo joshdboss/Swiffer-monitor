@@ -14,7 +14,7 @@ def outputs(folderName):
     """ Gives the filename to output in
     """
     for i in itertools.count(1):
-        yield io.open('IMULog_%s/%s.txt' %
+        yield io.open('%s/IMULog_%s.txt' %
                       (folderName,
                        datetime.now().strftime('%Y_%m_%d_%H_%M_%S')),
                       'w')
