@@ -46,6 +46,12 @@ def powerButtonEvent(channel):
 def powerOff():
     """ Shutdown sequence
     """
+    global powerLEDPin
+    for i in range(3):
+        gpio.output(powerLEDPin,gpio.LOW)
+        time.sleep(0.2)
+        gpio.output(powerLEDPin,gpio.HIGH)
+        time.sleep(0.2)
     cleanup()
     time.sleep(5)
     logging.info('Shutting down')

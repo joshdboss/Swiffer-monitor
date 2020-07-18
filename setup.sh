@@ -1,10 +1,10 @@
 #!/bin/bash
-clear
 if [[ $EUID -ne 0 ]]; then
    echo "This script must be run as root" 
    exit 1
 fi
 
+clear
 echo '###################'
 echo 'UPDATING OS'
 echo '###################'
@@ -13,6 +13,7 @@ read response
 if [ "$response" == "y" ]; then
 	apt-get update
 	apt-get -y upgrade
+    apt-get autoremove
 fi
 
 # setup the interfaces
