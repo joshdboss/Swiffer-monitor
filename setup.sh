@@ -24,7 +24,9 @@ echo -n "Which RTC do you want to set up (DS1307/PCF8523/DS3231/none)? (1/2/3/n)
 read response
 if [ "$response" == 1 ]; then
 	apt-get install python-smbus i2c-tools #not necessary, but helpful for diagnosis
-	if [ ! grep -xq 'dtoverlay=i2c-rtc,ds1307' /boot/config.txt ] then
+	if grep -xq 'dtoverlay=i2c-rtc,ds1307' /boot/config.txt; then
+    	true
+    else
 		echo 'dtoverlay=i2c-rtc,ds1307' >> /boot/config.txt
 	fi  
 	cp ./static_files/hwclock-set /lib/udev/
@@ -32,7 +34,9 @@ if [ "$response" == 1 ]; then
 	update-rc.d -f fake-hwclock remove
 elif [ "$response" == 2 ]; then
 	apt-get install python-smbus i2c-tools #not necessary, but helpful for diagnosis
-	if [ ! grep -xq 'dtoverlay=i2c-rtc,pcf8523' /boot/config.txt ] then
+	if grep -xq 'dtoverlay=i2c-rtc,pcf8523' /boot/config.txt; then
+    	true
+    else
 		echo 'dtoverlay=i2c-rtc,pcf8523' >> /boot/config.txt
 	fi  
 	cp ./static_files/hwclock-set /lib/udev/
@@ -40,7 +44,9 @@ elif [ "$response" == 2 ]; then
 	update-rc.d -f fake-hwclock remove
 elif [ "$response" == 3 ]; then
 	apt-get install python-smbus i2c-tools #not necessary, but helpful for diagnosis
-	if [ ! grep -xq 'dtoverlay=i2c-rtc,ds3231' /boot/config.txt ] then
+	if grep -xq 'dtoverlay=i2c-rtc,ds3231' /boot/config.txt; then
+    	true
+    else
 		echo 'dtoverlay=i2c-rtc,ds3231' >> /boot/config.txt
 	fi  
 	cp ./static_files/hwclock-set /lib/udev/

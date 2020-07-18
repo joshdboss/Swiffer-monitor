@@ -116,7 +116,7 @@ def syncButtonEvent(channel):
             cleanup()
             time.sleep(5)
             logging.info('Resetting wifi')
-            #reset_lib.reset_to_host_mode()
+            reset_lib.reset_to_host_mode()
         else:
             logging.debug('Sync button pressed to sync')
             executor.submit(sync)
@@ -146,7 +146,7 @@ def cleanup():
     """ Function that is called whenever exiting the script
         to clean things up properly
     """
-    global executor
+    global executor, recordMode
     logging.info('Cleaning up')
     with executor:
         if recordMode:
