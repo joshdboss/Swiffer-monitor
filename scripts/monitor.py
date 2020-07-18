@@ -77,7 +77,7 @@ def stopRecord(process):
     """ Stops recording sequence
         Stops the camera and the IMU
     """
-    global recordMode, processMode executor, recordLEDPin
+    global recordMode, processMode, executor, recordLEDPin
     for i in range(3):
         gpio.output(recordLEDPin,gpio.LOW)
         time.sleep(0.2)
@@ -105,7 +105,6 @@ def syncButtonEvent(channel):
     global syncRiseTime, executor, syncLEDPin
     
     if gpio.input(channel):
-        print("rising")
         if ((datetime.now()-syncRiseTime).seconds >= 10):
             # reset the device only if button was pressed for 10 seconds
             logging.debug('Sync button pressed for long enough to reset wifi')

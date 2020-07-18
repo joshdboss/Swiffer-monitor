@@ -4,10 +4,10 @@ import shutil
 import subprocess
 import logging
 
-def syncGDrive(inputRootFolder='/home/pi/Logging/Unsent',
+def syncGDrive(skipFile='',
+               inputRootFolder='/home/pi/Logging/Unsent',
                outputFolder='gdmedia:/Logging',
-               sentFolder='/home/pi/Logging/Sent',
-               skipFile):
+               sentFolder='/home/pi/Logging/Sent'):
     
     for f in sorted(os.listdir(inputRootFolder)):
         fileName = os.path.join(inputRootFolder,f)
@@ -15,7 +15,7 @@ def syncGDrive(inputRootFolder='/home/pi/Logging/Unsent',
         # copy the files to the google Drive
         subprocess.call(['rclone', 'copy', fileName, outputFolder], shell=False)
         # move the files to the sent directory
-        if fileName is not skipFile:
+        if fileName != skipFile:
             try:
                 shutil.move(fileName, sentFolder)
             except:
