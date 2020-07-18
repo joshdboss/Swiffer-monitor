@@ -148,6 +148,7 @@ def cleanup():
     """
     global executor, recordMode
     logging.info('Cleaning up')
+    sync_lib.stopSync()
     with executor:
         if recordMode:
             stopRecord(False)

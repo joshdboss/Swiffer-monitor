@@ -1,10 +1,19 @@
 #!/bin/bash
 clear
+if [[ $EUID -ne 0 ]]; then
+   echo "This script must be run as root" 
+   exit 1
+fi
+
 echo '###################'
 echo 'UPDATING OS'
 echo '###################'
-apt-get update
-apt-get -y upgrade
+echo -n "Do you want to update the OS? (y/n)> "
+read response
+if [ "$response" == "y" ]; then
+	apt-get update
+	apt-get -y upgrade
+fi
 
 # setup the interfaces
 clear
@@ -25,7 +34,7 @@ read response
 if [ "$response" == 1 ]; then
 	apt-get install python-smbus i2c-tools #not necessary, but helpful for diagnosis
 	if grep -xq 'dtoverlay=i2c-rtc,ds1307' /boot/config.txt; then
-    	true
+		true
     else
 		echo 'dtoverlay=i2c-rtc,ds1307' >> /boot/config.txt
 	fi  
@@ -35,7 +44,7 @@ if [ "$response" == 1 ]; then
 elif [ "$response" == 2 ]; then
 	apt-get install python-smbus i2c-tools #not necessary, but helpful for diagnosis
 	if grep -xq 'dtoverlay=i2c-rtc,pcf8523' /boot/config.txt; then
-    	true
+		true
     else
 		echo 'dtoverlay=i2c-rtc,pcf8523' >> /boot/config.txt
 	fi  
@@ -45,7 +54,7 @@ elif [ "$response" == 2 ]; then
 elif [ "$response" == 3 ]; then
 	apt-get install python-smbus i2c-tools #not necessary, but helpful for diagnosis
 	if grep -xq 'dtoverlay=i2c-rtc,ds3231' /boot/config.txt; then
-    	true
+		true
     else
 		echo 'dtoverlay=i2c-rtc,ds3231' >> /boot/config.txt
 	fi  
