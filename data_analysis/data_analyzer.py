@@ -100,7 +100,6 @@ if __name__ == "__main__":
     plt.xlabel('Time of day (UTC)')
     plt.ylabel('Number of cleaning sessions')
     
-    
     chosen_session = session._registry[0]
     plt.figure(4)
     plt.title('Magnetometer readings')
@@ -118,7 +117,7 @@ if __name__ == "__main__":
     plt.plot(chosen_session.rawDateTime,chosen_session.rawIMU_accel_yaw)
     plt.legend(["Pitch","Roll","Yaw"])
     plt.xlabel('Time')
-    plt.ylabel('Angle (degrees)')
+    plt.ylabel('Angular acceleration (degrees$/s^2$)')
     
     plt.figure(6)
     plt.title('Gyroscope readings')
@@ -127,5 +126,5 @@ if __name__ == "__main__":
     plt.plot(chosen_session.rawDateTime,chosen_session.rawIMU_gyro_yaw)
     plt.legend(["Pitch","Roll","Yaw"])
     plt.xlabel('Time')
-    plt.ylabel('Angle (degrees)')
+    plt.ylabel('Angular velocity (degrees/s)')
     
